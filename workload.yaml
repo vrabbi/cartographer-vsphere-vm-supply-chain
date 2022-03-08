@@ -1,0 +1,15 @@
+apiVersion: carto.run/v1alpha1
+kind: Workload
+metadata:
+  name: demo-app
+  labels:
+    apps.tanzu.vmware.com/workload-type: vm
+    apps.tanzu.vmware.com/image-builder: packer
+    apps.tanzu.vmware.com/infrastructure: vsphere
+spec:
+  serviceAccountName: default
+  source:
+    git:
+      url: https://github.com/vrabbi/vsphere-packer-tap-demo
+      ref:
+        branch: main
