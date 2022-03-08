@@ -1,0 +1,26 @@
+#@data/values
+---
+#! VM Folder in vSphere inventory to create the Template and VM in
+vm_folder: ""
+#! The vSphere Portgroup name to use for the template creation and VM deployment (Must have DHCP enabled on the network)
+vm_network: ""
+#! The vSphere Cluster to deploy to
+cluster_name: "" 
+#! The VM name to deploy - (VM name will be suffixed with the deployment time stamp automatically)
+vm_name: ""
+#! Datastore name in vSphere to deploy to
+datastore_name: ""
+#! The vSphere Datacenter to deploy to
+datacenter_name: ""
+#! vSphere user name to use for packer and Terraform operations
+vcenter_username: ""
+#! Password for the vSphere user to use for packer and Terraform operations
+vcenter_password: ""
+#! SSH username to create on the new VM
+vm_user: ""
+#! SSH Password for the new user being created on the VM
+vm_password: ""
+#! FQDN or IP of the vCenter server this supply chain will target
+vcenter_fqdn: ""
+#! Boolean value to allow or deny insecure vSphere access aka no cert validation
+vcenter_insecure: true

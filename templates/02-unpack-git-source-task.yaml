@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: unpack-source
+  namespace: default
+spec:
+  params:
+  - name: blob-url
+    type: string
+  - name: blob-revision
+    type: string
+  steps:
+  - command:
+    - bash
+    - -cxe
+    - |-
+      set -o pipefail
+      echo $(params.blob-revision)
+      cd $(workspaces.output.path)
+      curl -SL $(params.blob-url) | tar xvzf -
+    image: ghcr.io/vrabbi/golang:latest
+    name: extract-source
+    resources: {}
+  workspaces:
+  - name: output

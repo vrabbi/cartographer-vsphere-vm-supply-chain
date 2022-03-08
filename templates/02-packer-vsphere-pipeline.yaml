@@ -1,0 +1,40 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: packer-builder
+  namespace: default
+spec:
+  results:
+  - name: image
+    value: $(tasks.packer-build.results.image)
+  params:
+  - description: Flux GitRepository URL source
+    name: source-url
+    type: string
+  - description: Flux GitRepository Revision
+    name: source-revision
+    type: string
+  tasks:
+  - name: unpack-source
+    params:
+    - name: blob-url
+      value: $(params.source-url)
+    - name: blob-revision
+      value: $(params.source-revision)
+    taskRef:
+      kind: Task
+      name: unpack-source
+    workspaces:
+    - name: output
+      workspace: source-ws
+  - name: packer-build
+    runAfter:
+    - unpack-source
+    taskRef:
+      kind: Task
+      name: packer-build
+    workspaces:
+    - name: source
+      workspace: source-ws
+  workspaces:
+  - name: source-ws

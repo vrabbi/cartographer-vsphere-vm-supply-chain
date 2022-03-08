@@ -1,0 +1,22 @@
+apiVersion: carto.run/v1alpha1
+kind: ClusterImageTemplate
+metadata:
+  name: packer
+spec:
+  imagePath: .status.outputs.imageRef
+  ytt: |
+    #@ load("@ytt:data", "data")
+    apiVersion: carto.run/v1alpha1
+    kind: Runnable
+    metadata:
+      name: #@ data.values.workload.metadata.name
+    spec:
+      inputs:
+        params:
+        - name: source-revision
+          value: #@ data.values.source.revision
+        - name: source-url
+          value: #@ data.values.source.url
+      runTemplateRef:
+        name: packer-build-pipeline
+    serviceAccountName: #@ data.values.workload.spec.serviceAccountName

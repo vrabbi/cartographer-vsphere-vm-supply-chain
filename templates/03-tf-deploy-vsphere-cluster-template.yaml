@@ -1,0 +1,93 @@
+apiVersion: carto.run/v1alpha1
+kind: ClusterTemplate
+metadata:
+  name: tf-deploy-vsphere
+spec:
+  template:
+    apiVersion: terraform.core.oam.dev/v1beta1
+    kind: Configuration
+    metadata:
+      name: $(workload.metadata.name)$
+    spec:
+      hcl: |
+        variable "vsphere-datacenter" {
+          type        = string
+          description = "VMware vSphere datacenter"
+        }
+        variable "folder-name" {
+          type        = string
+          description = "The name of folder"
+        }
+        variable "template-name" {
+          type        = string
+          description = "The template name to clone"
+        }
+        variable "network-name" {
+          type        = string
+          description = "The Network name to provision in"
+        }
+        variable "datastore-name" {
+          type        = string
+          description = "The DS name to provision on"
+        }
+        variable "vm-name" {
+          type        = string
+          description = "The VM name to provision"
+        }
+        variable "cluster-name" {
+          type        = string
+          description = "The Cluster name to provision to"
+        }
+        data "vsphere_datacenter" "dc" {
+          name = var.vsphere-datacenter
+        }
+        data "vsphere_virtual_machine" "template" {
+          name          = chomp(var.template-name)
+          datacenter_id = data.vsphere_datacenter.dc.id
+        }
+        data "vsphere_datastore" "datastore" {
+          name          = var.datastore-name
+          datacenter_id = data.vsphere_datacenter.dc.id
+        }
+        data "vsphere_compute_cluster" "compute_cluster" {
+          name          = var.cluster-name
+          datacenter_id = data.vsphere_datacenter.dc.id
+        }
+        data "vsphere_network" "net" {
+          name          = var.network-name
+          datacenter_id = data.vsphere_datacenter.dc.id
+        }
+        resource "vsphere_virtual_machine" "vm" {
+          name             = var.vm-name
+          folder           = var.folder-name
+          resource_pool_id = data.vsphere_compute_cluster.compute_cluster.resource_pool_id
+          datastore_id     = data.vsphere_datastore.datastore.id
+          num_cpus         = data.vsphere_virtual_machine.template.num_cpus
+          memory           = data.vsphere_virtual_machine.template.memory
+          guest_id         = data.vsphere_virtual_machine.template.guest_id
+          scsi_type        = data.vsphere_virtual_machine.template.scsi_type
+          network_interface {
+            network_id     = data.vsphere_network.net.id
+            adapter_type   = data.vsphere_virtual_machine.template.network_interface_types[0]
+          }
+          disk {
+            label          = "disk0"
+            size           = data.vsphere_virtual_machine.template.disks.0.size
+          }
+          clone {
+            template_uuid  = data.vsphere_virtual_machine.template.id
+          }
+        }
+        output "ip" {
+            value       = vsphere_virtual_machine.vm.default_ip_address
+        }
+      providerRef:
+        name: vsphere
+      variable:
+        cluster-name: $(params.cluster)$
+        datastore-name: $(params.ds)$
+        folder-name: $(params.folder)$
+        network-name: $(params.network)$
+        template-name: $(image)$
+        vm-name: $(params.vm-name)$
+        vsphere-datacenter: $(params.dc)$

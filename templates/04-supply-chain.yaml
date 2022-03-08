@@ -1,0 +1,43 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: carto.run/v1alpha1
+kind: ClusterSupplyChain
+metadata:
+  name: packer-to-tf-vsphere
+spec:
+  resources:
+  - name: source-provider
+    templateRef:
+      kind: ClusterSourceTemplate
+      name: git-source
+  - name: image-builder
+    sources:
+    - name: source
+      resource: source-provider
+    templateRef:
+      kind: ClusterImageTemplate
+      name: packer
+  - images:
+    - name: image
+      resource: image-builder
+    name: deployer
+    templateRef:
+      kind: ClusterTemplate
+      name: tf-deploy-vsphere
+    params:
+    - default: #@ data.values.vm_folder
+      name: folder
+    - default: #@ data.values.vm_network
+      name: network
+    - default: #@ data.values.cluster_name
+      name: cluster
+    - default: #@ data.values.vm_name
+      name: vm-name
+    - default: #@ data.values.datastore_name
+      name: ds
+    - default: #@ data.values.datacenter_name
+      name: dc
+  selector:
+    apps.tanzu.vmware.com/image-builder: packer
+    apps.tanzu.vmware.com/workload-type: vm
+    apps.tanzu.vmware.com/infrastructure: vsphere

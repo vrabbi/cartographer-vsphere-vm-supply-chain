@@ -1,0 +1,25 @@
+apiVersion: carto.run/v1alpha1
+kind: ClusterRunTemplate
+metadata:
+  name: packer-build-pipeline
+spec:
+  outputs:
+    imageRef: status.pipelineResults[0].value
+  template:
+    apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: $(runnable.metadata.name)$-
+    spec:
+      params: $(runnable.spec.inputs.params)$
+      pipelineRef:
+        name: packer-builder
+      workspaces:
+      - name: source-ws
+        volumeClaimTemplate:
+          spec:
+            accessModes:
+            - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
