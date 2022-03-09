@@ -13,3 +13,6 @@ spec:
       url: https://github.com/vrabbi/vsphere-packer-tap-demo
       ref:
         branch: main
+  params:
+    - name: vm-name
+      value: carto-demo-01

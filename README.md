@@ -38,6 +38,7 @@ kubectl create ns tap-oss
 tanzu package repository add tap-oss -n tap-oss --url ghcr.io/vrabbi/tap-oss-repo:0.2.4
 
 # Installation
+tanzu package install cert-manager -p cert-manager.tap.oss -v 1.6.1 -n tap-oss
 tanzu package install cartographer -p cartographer.tap.oss -v 0.2.1 -n tap-oss
 tanzu package install flux-source-controller -p flux-source-controller.tap.oss -v 0.21.1 -n tap-oss
 tanzu package install tekton-pipelines -p tekton.tap.oss -v 0.32.1 -n tap-oss
